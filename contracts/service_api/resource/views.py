@@ -1,8 +1,9 @@
 from sanic import response
 from sanic.response import text
 from sanic.views import HTTPMethodView
-from Contracts.service_api.domain.domain import get_args_from_url, create, update, delete
+
 from .forms import ContractSchema
+from ..domain.domain import get_args_from_url, create, update, delete
 
 
 class Contracts(HTTPMethodView):

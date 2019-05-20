@@ -1,5 +1,5 @@
-from Contracts.service_api.domain.models import Contract
-from Contracts.database import connection
+from .models import Contract
+from ..database  import connection 
 from sqlalchemy import column
 import sqlalchemy as sa
 

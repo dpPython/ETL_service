@@ -1,4 +1,4 @@
-from Contracts.service_api.resource.api_v1 import app, registration
+from service_api.resource.api_v1 import app, registration
 
 #app.add_task(registration)
 
