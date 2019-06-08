@@ -8,7 +8,7 @@ from sqlalchemy.sql import text
 
 available_filters = {
                         "title": "'",
-                        "amount": " ",
+                        "amount": "'",
                         "start_date": "'",
                         "end_date": "'",
                         "id": "'",
