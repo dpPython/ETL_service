@@ -11,4 +11,9 @@
         <tagDatabase tag="version_1.0.0"/>
     </changeSet>
 
+    <include file="changesets/Alter_columns_date.xml"/>
+    <changeSet author="ShapovalAndrey" id="2">
+        <tagDatabase tag="version_1.0.1"/>
+    </changeSet>
+
   </databaseChangeLog>
