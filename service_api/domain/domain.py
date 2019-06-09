@@ -1,9 +1,12 @@
 from service_api.domain.models import contract
 from database import connection
-from config import SERVICE_SOCKET, SERVICE_NAME
+from config import SERVICE_SOCKET, SERVICE_NAME, SDA_PORT, SDA_HOST
 import logging
 import psycopg2
 from sqlalchemy.sql import text
+from service_api.resource.forms import ContractSchema
+import aiohttp
+import json as responce_json
 
 
 available_filters = {
@@ -41,27 +44,45 @@ async def get_params_from_get_request(get_request_url):
 async def get_clause_for_query(url_params):
 
     list_of_clauses = []
+    column_value = {}
 
     filter_argument = await find_filter_argument(url_params)
     operator_and_values = await define_operator_and_values(url_params, filter_argument)
     argument_operator = operator_and_values[0]
-    argument_values = operator_and_values[1]
+    argument_value = operator_and_values[1]
 
-    clause_text = f"{filter_argument} {available_operators.get(str(argument_operator))} {argument_values}"
+    try:
+        if argument_value.startswith("("):
+            string_of_arguments = argument_value[2:-2]
+            list_of_arguments = string_of_arguments.split("','")
+            for value in list_of_arguments:
+                column_value[filter_argument] = value
+                valid_value = ContractSchema().load(column_value)
+                if valid_value.errors:
+                    raise ValueError
+        else:
+            column_value[filter_argument] = argument_value[1:-1]
+            valid_value = ContractSchema().load(column_value)
+            if valid_value.errors:
+                raise ValueError
 
-    if "and" in url_params:
-        urls_divided_by_and = url_params.split("and")
-        for url in urls_divided_by_and:
-            if "filter" not in url:
-                argument = await find_filter_argument_after_and(url)
-                operator_and_values = await define_operator_and_values(url, argument)
-                operator = operator_and_values[0]
-                values = operator_and_values[1]
-                clause_text += f" and {argument} {available_operators.get(str(operator))} {values}"
-    clause = text(clause_text)
-    list_of_clauses.append(clause)
+        clause_text = f"{filter_argument} {available_operators.get(str(argument_operator))} {argument_value}"
 
-    return list_of_clauses
+        if "and" in url_params:
+            urls_divided_by_and = url_params.split("and")
+            for url in urls_divided_by_and:
+                if "filter" not in url:
+                    argument = await find_filter_argument_after_and(url)
+                    operator_and_values = await define_operator_and_values(url, argument)
+                    operator = operator_and_values[0]
+                    values = operator_and_values[1]
+                    clause_text += f" and {argument} {available_operators.get(str(operator))} {values}"
+        clause = text(clause_text)
+        list_of_clauses.append(clause)
+
+        return list_of_clauses
+    except ValueError:
+        return 400, valid_value.errors
 
 
 async def find_filter_argument(url_params):
@@ -95,12 +116,11 @@ async def define_operator_and_values(url_params, filter_argument, start_search=0
         value_start = url_params.find(symbol, operator_index_end)
         value_end = url_params.find(symbol, value_start + 1)
         value = url_params[value_start: value_end + 1]
-        return [operator, value]
     else:
         value_start = url_params.find("%28", operator_index_end)
         value_end = url_params.find("%29", value_start)
         value = f'({url_params[value_start+3: value_end]})'
-        return [operator, value]
+    return [operator, value]
 
 
 async def query_to_db(query, flag='many'):
@@ -282,3 +302,40 @@ async def delete_contract_by_id(contract_id):
         response_after_delete['ID of deleted contract:'] = id_of_deleted_contract
 
     return response_after_delete
+
+
+async def get_service_payments():
+    payments_socket = []
+    sda_address = f"http://{SDA_HOST}:{SDA_PORT}/payments"
+    try:
+        async with aiohttp.ClientSession() as session:
+            resp = await session.get(sda_address)
+            decoded_socket = await resp.text()
+            socket_list = decoded_socket.split(",")
+            payments_socket.append(socket_list[0][2:-1])
+            payments_socket.append(socket_list[1][2:-2])
+            url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments"
+            return url
+    except Exception:
+        return 404
+
+
+async def send_get_request_to_payments(url, contract_ids):
+
+    contract_ids_list = contract_ids.replace(" ", "").split(",")
+
+    payments_by_contracts= {}
+
+    for contract_id in contract_ids_list:
+        params = {"filter": f'contract_id eq {str(contract_id)}'}
+        try:
+            async with aiohttp.ClientSession() as session:
+                payments_by_contract = await session.get(url, params=params)
+                payments_by_contracts[
+                        f'Payments by contract {contract_id}'
+                                      ] = payments_by_contract.json()   #responce_json.loads(payments_by_contract.body.decode("utf-8"))
+        except ValueError:
+            logging.error(f"ValueError. No payments with contract id {contract_id} founded")
+            return 404
+
+    return payments_by_contracts

@@ -1,7 +1,7 @@
 from sanic import response
 from sanic.response import text
 from sanic.views import HTTPMethodView
-from service_api.domain.domain import delete_contract_by_id, update_contract_by_id, get_contract_by_id, get_params_from_get_request, get_clause_for_query, query_to_db, create_contracts, update_contracts, delete_contracts #get_contracts, create_contracts, update_contracts, delete_contracts, get_contract_by_id
+from service_api.domain.domain import send_get_request_to_payments, get_service_payments, delete_contract_by_id, update_contract_by_id, get_contract_by_id, get_params_from_get_request, get_clause_for_query, query_to_db, create_contracts, update_contracts, delete_contracts #get_contracts, create_contracts, update_contracts, delete_contracts, get_contract_by_id
 from .forms import ContractSchema
 from service_api.domain.models import contract
 
@@ -13,16 +13,16 @@ class Contracts(HTTPMethodView):
         url_params = await get_params_from_get_request(request.url)
         if 'filter' in url_params:
             list_of_clauses_for_query = await get_clause_for_query(url_params)
+            if list_of_clauses_for_query[0] == 400:
+                return text(f'Bad request! {list_of_clauses_for_query[1]}')
             query = contract.select().where(list_of_clauses_for_query[0])
             contracts = await query_to_db(query)
-            valid_data = ContractSchema().dump(contracts, many=True)
-            return response.json(valid_data.data)
         else:
             contracts = await query_to_db(contract.select())
-            if contracts != 404:
-                valid_data = ContractSchema().dump(contracts, many=True)
-                return response.json(valid_data)
-        return text('Bad request')
+
+        valid_data = ContractSchema().dump(contracts, many=True)
+        return response.json(valid_data.data)
+
 
     async def post(self, request):
 
@@ -55,6 +55,19 @@ class Contract(HTTPMethodView):
     async def delete(self, request, contract_id):
         message_after_delete = await delete_contract_by_id(contract_id)
         return response.json(message_after_delete)
+
+
+class PaymentsByContract(HTTPMethodView):
+
+    async def get(self, request, contract_ids):
+
+        payments_url = await get_service_payments()
+        if payments_url == 404:
+            return text("Service payments is not available")
+
+        elif payments_url != 404:
+            payments_by_contracts = await send_get_request_to_payments(payments_url, contract_ids)
+            return response.json(payments_by_contracts)
 
 
 
