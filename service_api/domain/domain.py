@@ -7,28 +7,8 @@ from sqlalchemy.sql import text
 from service_api.resource.forms import ContractSchema
 import aiohttp
 from marshmallow import ValidationError
+from constants import AVAILABLE_FILTERS, AVAILABLE_OPERATORS
 
-
-
-available_filters = {
-                        "title": "'",
-                        "amount": "'",
-                        "start_date": "'",
-                        "end_date": "'",
-                        "id": "'",
-                        "customer": "'",
-                        "executor": "'"
-                    }
-
-available_operators = {
-                        "eq": "=",
-                        "ne": "!=",
-                        "ge": ">=",
-                        "gt": ">",
-                        "le": "<=",
-                        "lt": "<",
-                        "in": "in",
-                              }
 
 '''handlers for GET request'''
 
@@ -67,7 +47,7 @@ async def get_clause_for_query(url_params):
             if valid_value.errors:
                 raise ValidationError(message=valid_value.errors)
 
-        clause_text = f"{filter_argument} {available_operators.get(str(argument_operator))} {argument_value}"
+        clause_text = f"{filter_argument} {AVAILABLE_OPERATORS.get(str(argument_operator))} {argument_value}"
 
         if "and" in url_params:
             urls_divided_by_and = url_params.split("and")
@@ -77,7 +57,7 @@ async def get_clause_for_query(url_params):
                     operator_and_values = await define_operator_and_values(url, argument)
                     operator = operator_and_values[0]
                     values = operator_and_values[1]
-                    clause_text += f" and {argument} {available_operators.get(str(operator))} {values}"
+                    clause_text += f" and {argument} {AVAILABLE_OPERATORS.get(str(operator))} {values}"
         clause = text(clause_text)
         list_of_clauses.append(clause)
 
@@ -106,7 +86,7 @@ async def find_filter_argument_after_and(url):
 
 async def define_operator_and_values(url_params, filter_argument, start_search=0):
 
-    symbol = available_filters.get(str(filter_argument), " ")
+    symbol = AVAILABLE_FILTERS.get(str(filter_argument), " ")
     argument_position = url_params.find(filter_argument, start_search)
     operator_index_start = url_params.find(" ", argument_position)
     operator_index_end = url_params.find(" ", operator_index_start + 1)
@@ -141,19 +121,19 @@ async def query_to_db(query, flag='many'):
 
     except psycopg2.ProgrammingError:
         logging.error(f"ProgrammingError. Input parameters are not correct")
-        return 404
+        return 404, 'Not found'
     except psycopg2.InternalError:
         logging.error(f"InternalError. Input parameters are not correct")
-        return 404
+        return 404, 'Not found'
     except psycopg2.DataError:
         logging.error(f"DataError. Input parameters are not correct")
-        return 'Bad request'
+        return 400, 'Bad request'
     except psycopg2.IntegrityError:
         logging.error(f"IntegrityError. Input parameters are not correct")
-        return 404
+        return 404, 'Not found'
     except psycopg2.OperationalError:
         logging.error(f"OperationalError. Input parameters are not correct")
-        return 404
+        return 404, 'Not found'
 
 
 '''handlers for POST request'''
@@ -308,25 +288,20 @@ async def delete_contract_by_id(contract_id):
 async def get_service_payments():
     payments_socket = []
     sda_address = f"http://{SDA_HOST}:{SDA_PORT}/payments"
-    try:
-        async with aiohttp.ClientSession() as session:
-            resp = await session.get(sda_address)
-            decoded_socket = await resp.text()
-            socket_list = decoded_socket.split(",")
-            payments_socket.append(socket_list[0][2:-1])
-            payments_socket.append(socket_list[1][2:-2])
-            url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments"
-            return url
-    except Exception:
-        return 404
+
+    async with aiohttp.ClientSession() as session:
+        resp = await session.get(sda_address)
+        decoded_socket = await resp.text()
+        socket_list = decoded_socket.split(",")
+        payments_socket.append(socket_list[0][2:-1])
+        payments_socket.append(socket_list[1][2:-2])
+        url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments"
+        return url
 
 
 async def send_get_request_to_payments(url, contract_ids):
-
     contract_ids_list = contract_ids.replace(" ", "").split(",")
-
-    payments_by_contracts= {}
-
+    payments_by_contracts = {}
     for contract_id in contract_ids_list:
         params = {"filter": f'contract_id eq {str(contract_id)}'}
         try:
@@ -338,5 +313,4 @@ async def send_get_request_to_payments(url, contract_ids):
         except ValueError:
             logging.error(f"ValueError. No payments with contract id {contract_id} founded")
             return 404
-
     return payments_by_contracts
