@@ -6,7 +6,8 @@ import psycopg2
 from sqlalchemy.sql import text
 from service_api.resource.forms import ContractSchema
 import aiohttp
-import json as responce_json
+from marshmallow import ValidationError
+
 
 
 available_filters = {
@@ -59,12 +60,12 @@ async def get_clause_for_query(url_params):
                 column_value[filter_argument] = value
                 valid_value = ContractSchema().load(column_value)
                 if valid_value.errors:
-                    raise ValueError
+                    raise ValidationError
         else:
             column_value[filter_argument] = argument_value[1:-1]
             valid_value = ContractSchema().load(column_value)
             if valid_value.errors:
-                raise ValueError
+                raise ValidationError(message=valid_value.errors)
 
         clause_text = f"{filter_argument} {available_operators.get(str(argument_operator))} {argument_value}"
 
@@ -81,8 +82,8 @@ async def get_clause_for_query(url_params):
         list_of_clauses.append(clause)
 
         return list_of_clauses
-    except ValueError:
-        return 400, valid_value.errors
+    except ValidationError as err:
+        return 400, err.messages
 
 
 async def find_filter_argument(url_params):

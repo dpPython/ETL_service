@@ -14,7 +14,7 @@ class Contracts(HTTPMethodView):
         if 'filter' in url_params:
             list_of_clauses_for_query = await get_clause_for_query(url_params)
             if list_of_clauses_for_query[0] == 400:
-                return text(f'Bad request! {list_of_clauses_for_query[1]}')
+                return response.json(status=400, body=f'Bad request! {list_of_clauses_for_query[1]}')
             query = contract.select().where(list_of_clauses_for_query[0])
             contracts = await query_to_db(query)
         else:

@@ -9,5 +9,5 @@ DB_PORT = 5432
 DB_USER = "contracts_user"
 DB_PASSWORD = "contracts_user"
 
-SDA_HOST = "10.4.169.65"
+SDA_HOST = "0.0.0.0"
 SDA_PORT = 5001
