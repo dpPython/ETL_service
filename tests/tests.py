@@ -1,5 +1,7 @@
 from service_api.resource.api_v1 import app
 import json
+import pytest
+from service_api.domain.domain import *
 
 
 def test_smoke_get_returns_200():
@@ -28,8 +30,7 @@ def test_contracts_get_returns_200():
 
 
 def test_contracts_put_returns_200():
-    data = [
-    {
+    data = [{
         "amount": 23400,
         "id": "a32d6557-1553-40c5-a60a-47832e643e4f",
         "title": "Contract-9999999",
@@ -38,7 +39,7 @@ def test_contracts_put_returns_200():
         "end_date": "2011-06-24",
         "customer": "Express Scripts Holding"
     },
-    {
+     {
         "amount": 93600,
         "id": "f0ff9365-d1fd-4ee6-be2d-7c33cfd06475",
         "title": "Contract-8888888",
@@ -46,15 +47,13 @@ def test_contracts_put_returns_200():
         "start_date": "2014-05-13",
         "end_date": "2015-04-28",
         "customer": "Carrefour"
-    }
-]
+            }]
     request, response = app.test_client.put('/contracts/', data=json.dumps(data))
     assert response.status == 200
 
 
 def test_contracts_post_returns_200():
-    data = [
-    {
+    data = [{
         "customer": "Honda",
         "id": "580721d1-9611-4b23-aa3c-9c4458a58978",
         "amount": 200000000,
@@ -63,7 +62,7 @@ def test_contracts_post_returns_200():
         "start_date": "2019-12-27T00:00:00+02:00",
         "title": "Contract-800"
     },
-    {
+     {
         "customer": "Acura",
         "id": "791d5831-4c78-42c9-babd-a5a81fe7faf3",
         "amount": 30000000,
@@ -71,8 +70,7 @@ def test_contracts_post_returns_200():
         "end_date": "2018-01-01T00:00:00+02:00",
         "start_date": "2019-01-01T00:00:00+02:00",
         "title": "Contract-801"
-    }
-]
+    }]
     request, response = app.test_client.post('/contracts/', data=json.dumps(data))
     assert response.status == 200
 
@@ -84,20 +82,19 @@ def test_contracts_delete_returns_200():
 
 
 def test_contract_get_returns_200():
-    request, response = app.test_client.get('/contract/c31d866e-7b88-4388-8df4-86283edbc341')
+    request, response = app.test_client.get('/contract/6ce1bcf5-323d-4d62-a670-641f03eb4efe')
     assert response.status == 200
 
+
 def test_contract_put_returns_200():
-    data = [
-    {
-	    "customer": "Honda",
-	    "executor": "Brembo",
-	    "title": "Contract-9999",
-	    "end_date": "2018-12-27",
-	    "amount": 200000000,
-	    "start_date": "2019-12-27"
-    }
-            ]
+    data = [{
+            "customer": "Honda",
+            "executor": "Brembo",
+            "title": "Contract-9999",
+            "end_date": "2018-12-27",
+            "amount": 200000000,
+            "start_date": "2019-12-27"
+            }]
     request, response = app.test_client.put('/contract/c31d866e-7b88-4388-8df4-86283edbc341', data=json.dumps(data))
     assert response.status == 200
 
@@ -105,3 +102,26 @@ def test_contract_put_returns_200():
 def test_contract_delete_returns_200():
     request, response = app.test_client.delete('/contract/c31d866e-7b88-4388-8df4-86283edbc341')
     assert response.status == 200
+
+
+class AsyncTests(pytest):
+
+    async def test_get_params_from_get_request():
+        get_request_url = "http://0.0.0.0:8007/contracts/?filter=id eq 'fdcdff55-93fa-4434-ad14-d66a0e77a964'"
+        expected_result = "/?filter=id eq 'fdcdff55-93fa-4434-ad14-d66a0e77a964'"
+        result = await get_params_from_get_request(get_request_url)
+        assert result == expected_result
+
+    @staticmethod
+    async def test_validate_values():
+        field_value = {'id': 'e3f8a61b-9fab-445b-b8e3-61ddb4da5777'}
+        result = await validate_values(field_value)
+        expected_result = {}
+        assert result == expected_result
+
+    @staticmethod
+    async def test_validate_values_fail():
+        field_value = {'id': 'f8a61b-9fab-445b-b8e3-61ddb4da5777'}
+        result = await validate_values(field_value)
+        expected_result = {'id': ['ot a valid UUID.']}
+        assert result == expected_result

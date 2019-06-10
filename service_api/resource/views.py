@@ -53,7 +53,7 @@ class Contract(HTTPMethodView):
 
     async def delete(self, request, contract_id):
         message_after_delete = await delete_contract_by_id(contract_id)
-        if message_after_delete[0] == 400:
+        if type(message_after_delete) == tuple:
             return response.json(status=400, body=f'Bad request! {message_after_delete[1]}')
         return response.json(message_after_delete)
 
