@@ -9,7 +9,6 @@ import aiohttp
 from marshmallow import ValidationError
 from constants import AVAILABLE_FILTERS, AVAILABLE_OPERATORS
 
-
 '''handlers for GET request'''
 
 
@@ -295,7 +294,7 @@ async def get_service_payments():
         socket_list = decoded_socket.split(",")
         payments_socket.append(socket_list[0][2:-1])
         payments_socket.append(socket_list[1][2:-2])
-        url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments"
+        url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments/contracts/"
         return url
 
 
@@ -303,13 +302,15 @@ async def send_get_request_to_payments(url, contract_ids):
     contract_ids_list = contract_ids.replace(" ", "").split(",")
     payments_by_contracts = {}
     for contract_id in contract_ids_list:
-        params = {"filter": f'contract_id eq {str(contract_id)}'}
+        params = {"id": contract_id}
         try:
             async with aiohttp.ClientSession() as session:
                 payments_by_contract = await session.get(url, params=params)
+                data = await payments_by_contract.json()
+
                 payments_by_contracts[
                         f'Payments by contract {contract_id}'
-                                      ] = payments_by_contract.json()   #responce_json.loads(payments_by_contract.body.decode("utf-8"))
+                                      ] = data
         except ValueError:
             logging.error(f"ValueError. No payments with contract id {contract_id} founded")
             return 404
