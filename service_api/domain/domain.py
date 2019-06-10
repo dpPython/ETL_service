@@ -21,6 +21,11 @@ async def get_params_from_get_request(get_request_url):
     return url_params
 
 
+async def validate_values(field_value):
+    valid_value = ContractSchema().load(field_value)
+    return valid_value.errors
+
+
 async def get_clause_for_query(url_params):
 
     list_of_clauses = []
@@ -37,14 +42,14 @@ async def get_clause_for_query(url_params):
             list_of_arguments = string_of_arguments.split("','")
             for value in list_of_arguments:
                 column_value[filter_argument] = value
-                valid_value = ContractSchema().load(column_value)
-                if valid_value.errors:
-                    raise ValidationError
+                invalid_value = await validate_values(column_value)
+                if invalid_value:
+                    raise ValidationError(message=invalid_value)
         else:
             column_value[filter_argument] = argument_value[1:-1]
-            valid_value = ContractSchema().load(column_value)
-            if valid_value.errors:
-                raise ValidationError(message=valid_value.errors)
+            invalid_value = await validate_values(column_value)
+            if invalid_value:
+                raise ValidationError(message=invalid_value)
 
         clause_text = f"{filter_argument} {AVAILABLE_OPERATORS.get(str(argument_operator))} {argument_value}"
 
@@ -219,24 +224,27 @@ async def delete_contracts(contract_ids: list) -> dict:
             query = contract.delete().returning(contract.c.id).where(contract.c.id == contract_id)
             deleted_id = await query_to_db(query, flag='one')
             ids_of_deleted_contracts.append(deleted_id[0])
-
     if ids_of_deleted_contracts and ids_of_not_deleted_contracts:
         response_after_delete['Deleted contracts:'] = ids_of_deleted_contracts
         response_after_delete['There are no such contracts:'] = ids_of_not_deleted_contracts
-
     elif ids_of_deleted_contracts:
         response_after_delete['Deleted contracts:'] = ids_of_deleted_contracts
-
     else:
         response_after_delete['There are no such contracts:'] = ids_of_not_deleted_contracts
-
     return response_after_delete
 
 
 async def get_contract_by_id(contract_id):
-    query = contract.select().where(contract.c.id == contract_id)
-    contract_instance = await query_to_db(query, flag='one')
-    return contract_instance
+    try:
+        invalid_contract_id = await validate_values({'id': contract_id})
+        if invalid_contract_id:
+            raise ValidationError(message=invalid_contract_id)
+        query = contract.select().where(contract.c.id == contract_id)
+        contract_instance = await query_to_db(query, flag='one')
+        return contract_instance
+
+    except ValidationError as err:
+        return 400, err.messages
 
 
 async def update_contract_by_id(contract_id, json):
@@ -264,24 +272,30 @@ async def update_contract_by_id(contract_id, json):
 
 
 async def delete_contract_by_id(contract_id):
-    response_after_delete = {}
-    id_of_deleted_contract = ""
-    id_of_not_deleted_contract = ""
+    try:
+        invalid_contract_id = await validate_values({'id': contract_id})
+        if invalid_contract_id:
+            raise ValidationError(message=invalid_contract_id)
+        response_after_delete = {}
+        id_of_deleted_contract = ""
+        id_of_not_deleted_contract = ""
 
-    exist, absent = await check_existence_in_db([contract_id])
-    if absent:
-        id_of_not_deleted_contract += contract_id
-    else:
-        query = contract.delete().returning(contract.c.id).where(contract.c.id == contract_id)
-        deleted_id = await query_to_db(query, flag='one')
-        id_of_deleted_contract += deleted_id[0]
+        exist, absent = await check_existence_in_db([contract_id])
+        if absent:
+            id_of_not_deleted_contract += contract_id
+        else:
+            query = contract.delete().returning(contract.c.id).where(contract.c.id == contract_id)
+            deleted_id = await query_to_db(query, flag='one')
+            id_of_deleted_contract += deleted_id[0]
 
-    if id_of_not_deleted_contract:
-        response_after_delete['There are no such contract in database:'] = id_of_not_deleted_contract
-    else:
-        response_after_delete['ID of deleted contract:'] = id_of_deleted_contract
+        if id_of_not_deleted_contract:
+            response_after_delete['There are no such contract in database:'] = id_of_not_deleted_contract
+        else:
+            response_after_delete['ID of deleted contract:'] = id_of_deleted_contract
 
-    return response_after_delete
+        return response_after_delete
+    except ValidationError as err:
+        return 400, err.messages
 
 
 async def get_service_payments():
