@@ -1,7 +1,5 @@
 from service_api.resource.api_v1 import app
 import json
-import pytest
-from service_api.domain.domain import *
 
 
 def test_smoke_get_returns_200():
@@ -54,7 +52,7 @@ def test_contracts_put_returns_200():
 
 def test_contracts_post_returns_200():
     data = [{
-        "customer": "Honda",
+        "customer": "Honda1",
         "id": "580721d1-9611-4b23-aa3c-9c4458a58978",
         "amount": 200000000,
         "executor": "Brembo",
@@ -104,24 +102,3 @@ def test_contract_delete_returns_200():
     assert response.status == 200
 
 
-class AsyncTests(pytest):
-
-    async def test_get_params_from_get_request():
-        get_request_url = "http://0.0.0.0:8007/contracts/?filter=id eq 'fdcdff55-93fa-4434-ad14-d66a0e77a964'"
-        expected_result = "/?filter=id eq 'fdcdff55-93fa-4434-ad14-d66a0e77a964'"
-        result = await get_params_from_get_request(get_request_url)
-        assert result == expected_result
-
-    @staticmethod
-    async def test_validate_values():
-        field_value = {'id': 'e3f8a61b-9fab-445b-b8e3-61ddb4da5777'}
-        result = await validate_values(field_value)
-        expected_result = {}
-        assert result == expected_result
-
-    @staticmethod
-    async def test_validate_values_fail():
-        field_value = {'id': 'f8a61b-9fab-445b-b8e3-61ddb4da5777'}
-        result = await validate_values(field_value)
-        expected_result = {'id': ['ot a valid UUID.']}
-        assert result == expected_result

@@ -1,4 +1,8 @@
 from service_api.domain.domain import *
+from decimal import Decimal
+import datetime
+import psycopg2
+from uuid import UUID
 
 
 async def test_get_params_from_get_request():
@@ -95,3 +99,41 @@ async def test_define_operator_and_values_title_in():
     result = await define_operator_and_values(url_params, filter_argument)
     expected_result = ['in', "('Contract-222', 'Contract-434')"]
     assert result == expected_result
+
+
+async def test_query_to_db():
+    query = "SELECT contract.id, contract.title, contract.amount, " \
+            "contract.start_date, contract.end_date, contract.customer, " \
+            "contract.executor FROM contract WHERE id" \
+            " = 'fdcdff55-93fa-4434-ad14-d66a0e77a964'"
+    result = await query_to_db(query)
+    expected_result = [
+        (UUID('fdcdff55-93fa-4434-ad14-d66a0e77a964'), 'Contract-210', Decimal('52000.0'),
+         datetime.datetime(2012, 2, 1, 0, 0, tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=120, name=None)),
+         datetime.datetime(2013, 1, 16, 0, 0, tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=120, name=None)),
+         'Freddie Mac', 'Airbus Group')
+                       ]
+    assert result == expected_result
+
+
+async def test_query_to_db_flag_one():
+    query = "SELECT contract.id, contract.title, contract.amount, contract.start_date, " \
+            "contract.end_date, contract.customer, contract.executor " \
+            "FROM contract WHERE contract.id = 'f9cacfb4-0cde-42cc-8a94-ba90009d5cec'"
+    result = await query_to_db(query, flag='one')
+    expected_result = (UUID('f9cacfb4-0cde-42cc-8a94-ba90009d5cec'), 'Contract-83', Decimal('26600.0'),
+                       datetime.datetime(2010, 9, 11, 0, 0,
+                                         tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=180, name=None)),
+                       datetime.datetime(2011, 8, 27, 0, 0,
+                                         tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=180, name=None)),
+                       'Berkshire Hathaway', 'Airbus Group')
+    assert result == expected_result
+
+
+
+
+
+
+
+
+
