@@ -18,17 +18,22 @@ class Contracts(HTTPMethodView):
             contracts = await query_to_db(query)
         else:
             contracts = await query_to_db(contract.select())
-
+        if not contracts:
+            return response.json(status=404, body="Not found! Contract doesn't exist")
         valid_data = ContractSchema().dump(contracts, many=True)
         return response.json(valid_data.data)
 
     async def post(self, request):
         new_contracts = await create_contracts(request.json)
+        if new_contracts[0] == 400:
+            return response.json(status=400, body=f'Bad request! {new_contracts[1]}')
         valid_new_contracts = ContractSchema().dump(new_contracts, many=True)
         return response.json(valid_new_contracts.data)
 
     async def put(self, request):
         updated_contracts = await update_contracts(request.json)
+        if updated_contracts[0] == 400:
+            return response.json(status=400, body=f'Bad request! {updated_contracts[1]}')
         valid_updated_contracts = ContractSchema().dump(updated_contracts, many=True)
         return response.json(valid_updated_contracts.data)
 
@@ -43,11 +48,17 @@ class Contract(HTTPMethodView):
         desired_contract = await get_contract_by_id(contract_id)
         if desired_contract[0] == 400:
             return response.json(status=400, body=f'Bad request! {desired_contract[1]}')
+        elif desired_contract[0] == 404:
+            return response.json(status=404, body=f'{desired_contract[1]}')
         result = ContractSchema().dump(desired_contract)
         return response.json(result.data)
 
     async def put(self, request, contract_id):
         update_contract = await update_contract_by_id(contract_id, request.json)
+        if update_contract[0] == 400:
+            return response.json(status=400, body=f'Bad request! {update_contract[1]}')
+        elif update_contract[0] == 404:
+            return response.json(status=404, body=f'{update_contract[1]}')
         result = ContractSchema().dump(update_contract)
         return response.json(result.data)
 
@@ -67,3 +78,4 @@ class PaymentsByContract(HTTPMethodView):
         elif payments_url != 404:
             payments_by_contracts = await send_get_request_to_payments(payments_url, contract_ids)
             return response.json(payments_by_contracts)
+

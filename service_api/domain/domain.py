@@ -8,6 +8,8 @@ from service_api.resource.forms import ContractSchema
 import aiohttp
 from marshmallow import ValidationError
 from constants import AVAILABLE_FILTERS, AVAILABLE_OPERATORS
+from sanic.exceptions import NotFound
+
 
 '''handlers for GET request'''
 
@@ -145,27 +147,35 @@ async def query_to_db(query, flag='many'):
 
 async def create_contracts(json):
     new_contracts = []
-    for item in json:
-        values_to_insert = {
-                            "title": item["title"],
-                            "amount": item["amount"],
-                            "start_date": item["start_date"],
-                            "end_date": item["end_date"],
-                            "customer": item["customer"],
-                            "executor": item["executor"]
-                            }
-        query = contract.insert().returning(
-                                            contract.c.id,
-                                            contract.c.title,
-                                            contract.c.customer,
-                                            contract.c.executor,
-                                            contract.c.start_date,
-                                            contract.c.end_date,
-                                            contract.c.amount
-                                            ).values(values_to_insert)
-        new_contract = await query_to_db(query, flag='one')
-        new_contracts.append(new_contract)
-    return new_contracts
+    try:
+        for item in json:
+            values_to_insert = {
+                                "title": item["title"],
+                                "amount": item["amount"],
+                                "start_date": item["start_date"],
+                                "end_date": item["end_date"],
+                                "customer": item["customer"],
+                                "executor": item["executor"]
+                                }
+            invalid_values = await validate_values(values_to_insert)
+            if invalid_values:
+                raise ValidationError(message=invalid_values)
+
+            query = contract.insert().returning(
+                                                contract.c.id,
+                                                contract.c.title,
+                                                contract.c.customer,
+                                                contract.c.executor,
+                                                contract.c.start_date,
+                                                contract.c.end_date,
+                                                contract.c.amount
+                                                ).values(values_to_insert)
+            new_contract = await query_to_db(query, flag='one')
+            new_contracts.append(new_contract)
+        return new_contracts
+    except ValidationError as err:
+        return 400, err.messages
+
 
 '''PUT request'''
 
@@ -173,28 +183,34 @@ async def create_contracts(json):
 async def update_contracts(json):
 
     updated_contracts = []
-    for item in json:
-        values_to_update = {
-            "title": item["title"],
-            "amount": item["amount"],
-            "start_date": item["start_date"],
-            "end_date": item["end_date"],
-            "customer": item["customer"],
-            "executor": item["executor"]
-        }
-        query = contract.update().returning(
-            contract.c.id,
-            contract.c.title,
-            contract.c.customer,
-            contract.c.executor,
-            contract.c.start_date,
-            contract.c.end_date,
-            contract.c.amount
-        ).where(contract.c.id == item["id"]).values(values_to_update)
-        updated_contract = await query_to_db(query, flag='one')
-        updated_contracts.append(updated_contract)
+    try:
+        for item in json:
+            values_to_update = {
+                "title": item["title"],
+                "amount": item["amount"],
+                "start_date": item["start_date"],
+                "end_date": item["end_date"],
+                "customer": item["customer"],
+                "executor": item["executor"]
+            }
+            invalid_values = await validate_values(values_to_update)
+            if invalid_values:
+                raise ValidationError(message=invalid_values)
+            query = contract.update().returning(
+                contract.c.id,
+                contract.c.title,
+                contract.c.customer,
+                contract.c.executor,
+                contract.c.start_date,
+                contract.c.end_date,
+                contract.c.amount
+            ).where(contract.c.id == item["id"]).values(values_to_update)
+            updated_contract = await query_to_db(query, flag='one')
+            updated_contracts.append(updated_contract)
 
-    return updated_contracts
+        return updated_contracts
+    except ValidationError as err:
+        return 400, err.messages
 
 
 async def check_existence_in_db(contract_ids):
@@ -241,34 +257,51 @@ async def get_contract_by_id(contract_id):
             raise ValidationError(message=invalid_contract_id)
         query = contract.select().where(contract.c.id == contract_id)
         contract_instance = await query_to_db(query, flag='one')
+        if not contract_instance:
+            raise NotFound(message='There are no contracts with such id')
         return contract_instance
 
     except ValidationError as err:
         return 400, err.messages
+    except NotFound as err:
+        return 404, err
 
 
 async def update_contract_by_id(contract_id, json):
-    for item in json:
-        values_to_update = {
-            "title": item["title"],
-            "amount": item["amount"],
-            "start_date": item["start_date"],
-            "end_date": item["end_date"],
-            "customer": item["customer"],
-            "executor": item["executor"]
-        }
-        query = contract.update().returning(
-            contract.c.id,
-            contract.c.title,
-            contract.c.customer,
-            contract.c.executor,
-            contract.c.start_date,
-            contract.c.end_date,
-            contract.c.amount
-        ).where(contract.c.id == contract_id).values(values_to_update)
-        updated_contract = await query_to_db(query, flag='one')
+    try:
+        for item in json:
+            values_to_update = {
+                "title": item["title"],
+                "amount": item["amount"],
+                "start_date": item["start_date"],
+                "end_date": item["end_date"],
+                "customer": item["customer"],
+                "executor": item["executor"]
+            }
+            values_to_validate = values_to_update.copy()
+            values_to_validate['id'] = contract_id
+            invalid_values = await validate_values(values_to_validate)
+            if invalid_values:
+                raise ValidationError(message=invalid_values)
+            absence_in_db = await check_existence_in_db([contract_id])
+            if absence_in_db[1]:
+                raise NotFound(message='There are no contracts with such id')
+            query = contract.update().returning(
+                contract.c.id,
+                contract.c.title,
+                contract.c.customer,
+                contract.c.executor,
+                contract.c.start_date,
+                contract.c.end_date,
+                contract.c.amount
+            ).where(contract.c.id == contract_id).values(values_to_update)
+            updated_contract = await query_to_db(query, flag='one')
 
-        return updated_contract
+            return updated_contract
+    except ValidationError as err:
+        return 400, err.messages
+    except NotFound as err:
+        return 404, err
 
 
 async def delete_contract_by_id(contract_id):
@@ -308,7 +341,7 @@ async def get_service_payments():
         socket_list = decoded_socket.split(",")
         payments_socket.append(socket_list[0][2:-1])
         payments_socket.append(socket_list[1][2:-2])
-        url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments/contracts/"
+        url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments/?filter=contract_id%20eq%20"
         return url
 
 
@@ -316,12 +349,16 @@ async def send_get_request_to_payments(url, contract_ids):
     contract_ids_list = contract_ids.replace(" ", "").split(",")
     payments_by_contracts = {}
     for contract_id in contract_ids_list:
-        params = {"id": contract_id}
+        url_with_contract_id = f"{url}%27{contract_id}%27"
         try:
             async with aiohttp.ClientSession() as session:
-                payments_by_contract = await session.get(url, params=params)
-                data = await payments_by_contract.json()
-
+                payments_by_contract = await session.get(url_with_contract_id)
+                if payments_by_contract.content_type == 'text/plain':
+                    data = 'Incorrect input of contract_id '
+                else:
+                    data = await payments_by_contract.json()
+                    if not data:
+                        data = 'There are no payments by this contract'
                 payments_by_contracts[
                         f'Payments by contract {contract_id}'
                                       ] = data
