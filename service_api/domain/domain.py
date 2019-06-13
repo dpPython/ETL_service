@@ -1,15 +1,16 @@
-from service_api.domain.models import contract
-from database import connection
-from config import SERVICE_SOCKET, SERVICE_NAME, SDA_PORT, SDA_HOST
 import logging
-import psycopg2
-from sqlalchemy.sql import text
-from service_api.resource.forms import ContractSchema
-import aiohttp
-from marshmallow import ValidationError
-from constants import AVAILABLE_FILTERS, AVAILABLE_OPERATORS
-from sanic.exceptions import NotFound
 
+import aiohttp
+import psycopg2
+from marshmallow import ValidationError
+from sanic.exceptions import NotFound
+from sqlalchemy.sql import text
+
+from config import SDA_HOST, SDA_PORT, SERVICE_NAME, SERVICE_SOCKET
+from constants import AVAILABLE_FILTERS, AVAILABLE_OPERATORS
+from database import connection
+from service_api.domain.models import contract
+from service_api.resource.forms import ContractSchema
 
 '''handlers for GET request'''
 
@@ -34,7 +35,9 @@ async def get_clause_for_query(url_params):
     column_value = {}
 
     filter_argument = await find_filter_argument(url_params)
-    operator_and_values = await define_operator_and_values(url_params, filter_argument)
+    operator_and_values = await define_operator_and_values(
+                                url_params, filter_argument
+                                                           )
     argument_operator = operator_and_values[0]
     argument_value = operator_and_values[1]
 
@@ -53,17 +56,22 @@ async def get_clause_for_query(url_params):
             if invalid_value:
                 raise ValidationError(message=invalid_value)
 
-        clause_text = f"{filter_argument} {AVAILABLE_OPERATORS.get(str(argument_operator))} {argument_value}"
+        clause_text = f"{filter_argument} " \
+            f"{AVAILABLE_OPERATORS.get(str(argument_operator))} " \
+            f"{argument_value}"
 
         if "and" in url_params:
             urls_divided_by_and = url_params.split("and")
             for url in urls_divided_by_and:
                 if "filter" not in url:
                     argument = await find_filter_argument_after_and(url)
-                    operator_and_values = await define_operator_and_values(url, argument)
+                    operator_and_values = await define_operator_and_values(
+                                                            url, argument
+                                                                           )
                     operator = operator_and_values[0]
                     values = operator_and_values[1]
-                    clause_text += f" and {argument} {AVAILABLE_OPERATORS.get(str(operator))} {values}"
+                    clause_text += f" and {argument} " \
+                        f"{AVAILABLE_OPERATORS.get(str(operator))} {values}"
         clause = text(clause_text)
         list_of_clauses.append(clause)
 
@@ -90,7 +98,8 @@ async def find_filter_argument_after_and(url):
     return filter_argument
 
 
-async def define_operator_and_values(url_params, filter_argument, start_search=0):
+async def define_operator_and_values(url_params, filter_argument,
+                                     start_search=0):
 
     symbol = AVAILABLE_FILTERS.get(str(filter_argument), " ")
     argument_position = url_params.find(filter_argument, start_search)
@@ -237,16 +246,22 @@ async def delete_contracts(contract_ids: list) -> dict:
         if absent:
             ids_of_not_deleted_contracts.append(contract_id)
         else:
-            query = contract.delete().returning(contract.c.id).where(contract.c.id == contract_id)
+            query = contract.delete().returning(contract.c.id).where(
+                                        contract.c.id == contract_id
+                                                                     )
             deleted_id = await query_to_db(query, flag='one')
             ids_of_deleted_contracts.append(deleted_id[0])
     if ids_of_deleted_contracts and ids_of_not_deleted_contracts:
         response_after_delete['Deleted contracts:'] = ids_of_deleted_contracts
-        response_after_delete['There are no such contracts:'] = ids_of_not_deleted_contracts
+        response_after_delete[
+            'There are no such contracts:'
+                              ] = ids_of_not_deleted_contracts
     elif ids_of_deleted_contracts:
         response_after_delete['Deleted contracts:'] = ids_of_deleted_contracts
     else:
-        response_after_delete['There are no such contracts:'] = ids_of_not_deleted_contracts
+        response_after_delete[
+            'There are no such contracts:'
+                              ] = ids_of_not_deleted_contracts
     return response_after_delete
 
 
@@ -317,14 +332,20 @@ async def delete_contract_by_id(contract_id):
         if absent:
             id_of_not_deleted_contract += contract_id
         else:
-            query = contract.delete().returning(contract.c.id).where(contract.c.id == contract_id)
+            query = contract.delete().returning(contract.c.id).where(
+                                        contract.c.id == contract_id
+                                                                     )
             deleted_id = await query_to_db(query, flag='one')
             id_of_deleted_contract += deleted_id[0]
 
         if id_of_not_deleted_contract:
-            response_after_delete['There are no such contract in database:'] = id_of_not_deleted_contract
+            response_after_delete[
+                'There are no such contract in database:'
+                                  ] = id_of_not_deleted_contract
         else:
-            response_after_delete['ID of deleted contract:'] = id_of_deleted_contract
+            response_after_delete[
+                'ID of deleted contract:'
+                                  ] = id_of_deleted_contract
 
         return response_after_delete
     except ValidationError as err:
@@ -341,7 +362,8 @@ async def get_service_payments():
         socket_list = decoded_socket.split(",")
         payments_socket.append(socket_list[0][2:-1])
         payments_socket.append(socket_list[1][2:-2])
-        url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments/?filter=contract_id%20eq%20"
+        url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments/" \
+            f"?filter=contract_id%20eq%20"
         return url
 
 
@@ -363,6 +385,7 @@ async def send_get_request_to_payments(url, contract_ids):
                         f'Payments by contract {contract_id}'
                                       ] = data
         except ValueError:
-            logging.error(f"ValueError. No payments with contract id {contract_id} founded")
+            logging.error(f"ValueError. No payments with contract id "
+                          f"{contract_id} founded")
             return 404
     return payments_by_contracts

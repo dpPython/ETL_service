@@ -1,5 +1,6 @@
 from aiopg.sa import create_engine
-from config import *
+
+from config import DB_HOST, DB_PASSWORD, DB_PORT, DB_USER, SERVICE_DB
 
 
 async def connection():
