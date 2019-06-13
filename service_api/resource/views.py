@@ -2,16 +2,17 @@ from sanic import response
 from sanic.response import text
 from sanic.views import HTTPMethodView
 
-from service_api.domain.domain import (create_contracts, delete_contract_by_id,
-                                       delete_contracts, get_clause_for_query,
-                                       get_contract_by_id,
-                                       get_params_from_get_request,
-                                       get_service_payments, query_to_db,
-                                       send_get_request_to_payments,
-                                       update_contract_by_id, update_contracts)
 from service_api.domain.models import contract
-
-from .forms import ContractSchema
+from service_api.domain.services import (create_contracts,
+                                         delete_contract_by_id,
+                                         delete_contracts, get_contract_by_id,
+                                         get_payments_by_contracts,
+                                         query_to_db, update_contract_by_id,
+                                         update_contracts)
+from service_api.domain.utils import (get_clause_for_query,
+                                      get_params_from_get_request,
+                                      get_service_payments)
+from service_api.resource.forms import ContractSchema
 
 
 class Contracts(HTTPMethodView):
@@ -111,7 +112,7 @@ class PaymentsByContract(HTTPMethodView):
         if payments_url == 404:
             return text("Service payments is not available")
         elif payments_url != 404:
-            payments_by_contracts = await send_get_request_to_payments(
+            payments_by_contracts = await get_payments_by_contracts(
                                             payments_url, contract_ids
                                                                        )
             return response.json(payments_by_contracts)

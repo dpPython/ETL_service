@@ -4,11 +4,11 @@ from uuid import UUID
 
 import psycopg2
 
-from service_api.domain.domain import (define_operator_and_values,
-                                       find_filter_argument,
-                                       find_filter_argument_after_and,
-                                       get_params_from_get_request,
-                                       query_to_db, validate_values)
+from service_api.domain.services import (define_operator_and_values,
+                                         find_filter_argument,
+                                         find_filter_argument_after_and,
+                                         get_params_from_get_request,
+                                         query_to_db, validate_values)
 
 
 async def test_get_params_from_get_request():
