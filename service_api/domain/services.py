@@ -5,7 +5,25 @@ from marshmallow import ValidationError
 from sanic.exceptions import NotFound
 
 from service_api.domain.models import contract
-from service_api.domain.utils import query_to_db, validate_values
+from service_api.domain.utils import (get_clause_for_query,
+                                      get_params_from_get_request, query_to_db,
+                                      validate_values)
+
+
+async def get_contracts(request):
+    url_params = await get_params_from_get_request(request.url)
+    if 'filter' in url_params:
+        list_of_clauses_for_query = await get_clause_for_query(url_params)
+        if list_of_clauses_for_query[0] == 400:
+            return 400, list_of_clauses_for_query[1]
+        query = contract.select().where(list_of_clauses_for_query[0])
+        contracts = await query_to_db(query)
+    else:
+        query = contract.select()
+        contracts = await query_to_db(query)
+    if not contracts:
+        return 404, "Not found! Contract doesn't exist"
+    return contracts
 
 
 async def create_contracts(json):

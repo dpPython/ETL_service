@@ -2,39 +2,30 @@ from sanic import response
 from sanic.response import text
 from sanic.views import HTTPMethodView
 
-from service_api.domain.models import contract
 from service_api.domain.services import (create_contracts,
                                          delete_contract_by_id,
                                          delete_contracts, get_contract_by_id,
+                                         get_contracts,
                                          get_payments_by_contracts,
-                                         query_to_db, update_contract_by_id,
+                                         update_contract_by_id,
                                          update_contracts)
-from service_api.domain.utils import (get_clause_for_query,
-                                      get_params_from_get_request,
-                                      get_service_payments)
+from service_api.domain.utils import get_service_payments
 from service_api.resource.forms import ContractSchema
 
 
 class Contracts(HTTPMethodView):
 
     async def get(self, request):
-        url_params = await get_params_from_get_request(request.url)
-        if 'filter' in url_params:
-            list_of_clauses_for_query = await get_clause_for_query(url_params)
-            if list_of_clauses_for_query[0] == 400:
-                return response.json(
-                    status=400,
-                    body=f'Bad request! {list_of_clauses_for_query[1]}'
-                                     )
-            query = contract.select().where(list_of_clauses_for_query[0])
-            contracts = await query_to_db(query)
-        else:
-            contracts = await query_to_db(contract.select())
-        if not contracts:
+        contracts = await get_contracts(request)
+        if contracts[0] == 400:
+            return response.json(
+                status=400,
+                body=f'Bad request! {contracts[1]}'
+                                 )
+        elif contracts[0] == 404:
             return response.json(
                 status=404,
-                body="Not found! Contract doesn't exist"
-                                 )
+                body="Not found! Contract doesn't exist")
         valid_data = ContractSchema().dump(contracts, many=True)
         return response.json(valid_data.data)
 
