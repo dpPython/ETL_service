@@ -21,8 +21,11 @@ async def get_params_from_get_request(get_request_url):
 
 
 async def validate_values(field_value):
-    valid_value = ContractSchema().load(field_value)
-    return valid_value.errors
+    try:
+        ContractSchema().load(field_value)
+        return None
+    except ValidationError as err:
+        return err.messages
 
 
 async def get_clause_for_query(url_params):

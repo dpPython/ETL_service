@@ -9,7 +9,8 @@ from service_api.domain.services import (create_contracts,
                                          get_payments_by_contracts,
                                          update_contract_by_id,
                                          update_contracts,
-                                         update_some_fields_of_contract_by_id)
+                                         update_some_fields_of_contract_by_id,
+                                         update_some_fields_of_contracts)
 from service_api.domain.utils import get_service_payments
 from service_api.resource.forms import ContractSchema
 
@@ -28,7 +29,7 @@ class Contracts(HTTPMethodView):
                 status=404,
                 body="Not found! Contract doesn't exist")
         valid_data = ContractSchema().dump(contracts, many=True)
-        return response.json(valid_data.data)
+        return response.json(valid_data)
 
     async def post(self, request):
         new_contracts = await create_contracts(request.json)
@@ -38,7 +39,7 @@ class Contracts(HTTPMethodView):
                 body=f'Bad request! {new_contracts[1]}'
                                  )
         valid_new_contracts = ContractSchema().dump(new_contracts, many=True)
-        return response.json(valid_new_contracts.data)
+        return response.json(valid_new_contracts)
 
     async def put(self, request):
         updated_contracts = await update_contracts(request.json)
@@ -51,7 +52,25 @@ class Contracts(HTTPMethodView):
                                                         updated_contracts,
                                                         many=True
                                                         )
-        return response.json(valid_updated_contracts.data)
+        return response.json(valid_updated_contracts)
+
+    async def patch(self, request):
+        updated_contracts = await update_some_fields_of_contracts(request.json)
+        if updated_contracts[0] == 400:
+            return response.json(
+                status=400,
+                body=f'Bad request! {updated_contracts[1]}'
+                                 )
+        elif updated_contracts[0] == 404:
+            return response.json(
+                status=404,
+                body=f"Not found! {updated_contracts[1]}"
+                                 )
+        valid_updated_contracts = ContractSchema().dump(
+                                                        updated_contracts,
+                                                        many=True
+                                                        )
+        return response.json(valid_updated_contracts)
 
     async def delete(self, request):
         contract_ids = request.args.get("id", "").replace(" ", "").split(",")
@@ -70,7 +89,7 @@ class Contract(HTTPMethodView):
         elif desired_contract[0] == 404:
             return response.json(status=404, body=f'{desired_contract[1]}')
         result = ContractSchema().dump(desired_contract)
-        return response.json(result.data)
+        return response.json(result)
 
     async def put(self, request, contract_id):
         updated_contract = await update_contract_by_id(
@@ -85,7 +104,7 @@ class Contract(HTTPMethodView):
         elif updated_contract[0] == 404:
             return response.json(status=404, body=f'{updated_contract[1]}')
         result = ContractSchema().dump(updated_contract)
-        return response.json(result.data)
+        return response.json(result)
 
     async def patch(self, request, contract_id):
         updated_contract = await update_some_fields_of_contract_by_id(
@@ -100,7 +119,7 @@ class Contract(HTTPMethodView):
         elif updated_contract[0] == 404:
             return response.json(status=404, body=f'{updated_contract[1]}')
         result = ContractSchema().dump(updated_contract)
-        return response.json(result.data)
+        return response.json(result)
 
     async def delete(self, request, contract_id):
         message_after_delete = await delete_contract_by_id(contract_id)
@@ -118,8 +137,7 @@ class PaymentsByContract(HTTPMethodView):
         payments_url = await get_service_payments()
         if payments_url == 404:
             return text("Service payments is not available")
-        elif payments_url != 404:
-            payments_by_contracts = await get_payments_by_contracts(
+        payments_by_contracts = await get_payments_by_contracts(
                                             payments_url, contract_ids
-                                                                       )
-            return response.json(payments_by_contracts)
+                                                                )
+        return response.json(payments_by_contracts)

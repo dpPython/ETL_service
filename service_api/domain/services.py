@@ -82,6 +82,7 @@ async def update_contracts(json):
                     message='Not all required values in body'
                                       )
             values_to_update = {
+                "id": item["id"],
                 "title": item["title"],
                 "amount": item["amount"],
                 "start_date": item["start_date"],
@@ -107,6 +108,38 @@ async def update_contracts(json):
         return updated_contracts
     except ValidationError as err:
         return 400, err.messages
+
+
+async def update_some_fields_of_contracts(json):
+    updated_contracts = []
+    try:
+        for item in json:
+            values_to_update = item
+            values_to_validate = values_to_update.copy()
+            invalid_values = await validate_values(values_to_validate)
+            if invalid_values:
+                raise ValidationError(message=invalid_values)
+            absence_in_db = await check_existence_in_db([item.get('id')])
+            if absence_in_db[1]:
+                raise NotFound(message='There are no contracts with such id')
+            del values_to_update["id"]
+            query = contract.update().returning(
+                contract.c.id,
+                contract.c.title,
+                contract.c.customer,
+                contract.c.executor,
+                contract.c.start_date,
+                contract.c.end_date,
+                contract.c.amount
+            ).where(contract.c.id == values_to_validate.get('id')).values(values_to_update)
+            updated_contract = await query_to_db(query, flag="one")
+            updated_contracts.append(updated_contract)
+
+        return updated_contracts
+    except ValidationError as err:
+        return 400, err.messages
+    except NotFound as err:
+        return 404, err
 
 
 async def check_existence_in_db(contract_ids):
