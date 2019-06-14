@@ -158,3 +158,14 @@ async def get_service_payments():
         url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments/" \
             f"?filter=contract_id%20eq%20"
         return url
+
+
+async def filter_response_by_fields(fields, contracts):
+    filtered_contracts = []
+    for contract in contracts:
+        filtered_contract = {}
+        for item in contract.items():
+            if item[0] in fields:
+                filtered_contract[item[0]] = item[1]
+        filtered_contracts.append(filtered_contract)
+    return filtered_contracts

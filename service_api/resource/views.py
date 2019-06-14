@@ -11,7 +11,8 @@ from service_api.domain.services import (create_contracts,
                                          update_contracts,
                                          update_some_fields_of_contract_by_id,
                                          update_some_fields_of_contracts)
-from service_api.domain.utils import get_service_payments
+from service_api.domain.utils import (get_service_payments,
+                                      filter_response_by_fields)
 from service_api.resource.forms import ContractSchema
 
 
@@ -24,6 +25,10 @@ class Contracts(HTTPMethodView):
                 status=contracts[0],
                 body=contracts[1])
         valid_data = ContractSchema().dump(contracts, many=True)
+        fields = request.args.get('fields')
+        if fields:
+            fields = fields.replace(" ", "").split(',')
+            valid_data = await filter_response_by_fields(fields, valid_data)
         return response.json(valid_data)
 
     async def post(self, request):
