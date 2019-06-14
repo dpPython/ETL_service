@@ -19,23 +19,18 @@ class Contracts(HTTPMethodView):
 
     async def get(self, request):
         contracts = await get_contracts(request)
-        if contracts[0] == 400:
+        if type(contracts[0]) == int:
             return response.json(
-                status=400,
-                body=f'Bad request! {contracts[1]}'
-                                 )
-        elif contracts[0] == 404:
-            return response.json(
-                status=404,
-                body="Not found! Contract doesn't exist")
+                status=contracts[0],
+                body=contracts[1])
         valid_data = ContractSchema().dump(contracts, many=True)
         return response.json(valid_data)
 
     async def post(self, request):
         new_contracts = await create_contracts(request.json)
-        if new_contracts[0] == 400:
+        if type(new_contracts[0]) == int:
             return response.json(
-                status=400,
+                status=new_contracts[0],
                 body=f'Bad request! {new_contracts[1]}'
                                  )
         valid_new_contracts = ContractSchema().dump(new_contracts, many=True)
@@ -56,16 +51,11 @@ class Contracts(HTTPMethodView):
 
     async def patch(self, request):
         updated_contracts = await update_some_fields_of_contracts(request.json)
-        if updated_contracts[0] == 400:
+        if type(updated_contracts[0]) == int:
             return response.json(
-                status=400,
-                body=f'Bad request! {updated_contracts[1]}'
-                                 )
-        elif updated_contracts[0] == 404:
-            return response.json(
-                status=404,
-                body=f"Not found! {updated_contracts[1]}"
-                                 )
+                status=updated_contracts[0],
+                body=updated_contracts[1]
+                                )
         valid_updated_contracts = ContractSchema().dump(
                                                         updated_contracts,
                                                         many=True
@@ -81,13 +71,11 @@ class Contracts(HTTPMethodView):
 class Contract(HTTPMethodView):
     async def get(self, request, contract_id):
         desired_contract = await get_contract_by_id(contract_id)
-        if desired_contract[0] == 400:
+        if type(desired_contract[0]) == int:
             return response.json(
-                status=400,
-                body=f'Bad request! {desired_contract[1]}'
-                                 )
-        elif desired_contract[0] == 404:
-            return response.json(status=404, body=f'{desired_contract[1]}')
+                status=desired_contract[0],
+                body=desired_contract[1]
+                                )
         result = ContractSchema().dump(desired_contract)
         return response.json(result)
 
@@ -96,13 +84,11 @@ class Contract(HTTPMethodView):
                                                       contract_id,
                                                       request.json
                                                       )
-        if updated_contract[0] == 400:
+        if type(updated_contract[0]) == int:
             return response.json(
-                status=400,
-                body=f'Bad request! {updated_contract[1]}'
-                                 )
-        elif updated_contract[0] == 404:
-            return response.json(status=404, body=f'{updated_contract[1]}')
+                status=updated_contract[0],
+                body=updated_contract[1]
+                                )
         result = ContractSchema().dump(updated_contract)
         return response.json(result)
 
@@ -111,13 +97,11 @@ class Contract(HTTPMethodView):
                                                               contract_id,
                                                               request.json
                                                                       )
-        if updated_contract[0] == 400:
+        if type(updated_contract[0]) == int:
             return response.json(
-                status=400,
-                body=f'Bad request! {updated_contract[1]}'
-                                 )
-        elif updated_contract[0] == 404:
-            return response.json(status=404, body=f'{updated_contract[1]}')
+                status=updated_contract[0],
+                body=updated_contract[1]
+                                )
         result = ContractSchema().dump(updated_contract)
         return response.json(result)
 

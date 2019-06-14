@@ -193,13 +193,15 @@ async def get_contract_by_id(contract_id):
         query = contract.select().where(contract.c.id == contract_id)
         contract_instance = await query_to_db(query, flag='one')
         if not contract_instance:
-            raise NotFound(message='There are no contracts with such id')
+            raise NotFound(
+                message='Not found! There are no contracts with such id'
+                           )
         return contract_instance
 
     except ValidationError as err:
-        return 400, err.messages
+        return 400, f'Bad request! {err.messages}'
     except NotFound as err:
-        return 404, err
+        return err.status_code, err.args
 
 
 async def update_contract_by_id(contract_id, json):
@@ -229,7 +231,9 @@ async def update_contract_by_id(contract_id, json):
                 raise ValidationError(message=invalid_values)
             absence_in_db = await check_existence_in_db([contract_id])
             if absence_in_db[1]:
-                raise NotFound(message='There are no contracts with such id')
+                raise NotFound(
+                    message='Not found! There are no contracts with such id'
+                               )
             query = contract.update().returning(
                 contract.c.id,
                 contract.c.title,
@@ -243,9 +247,9 @@ async def update_contract_by_id(contract_id, json):
 
             return updated_contract
     except ValidationError as err:
-        return 400, err.messages
+        return 400, f'Bad request! {err.messages}'
     except NotFound as err:
-        return 404, err
+        return err.status_code, err.args
 
 
 async def update_some_fields_of_contract_by_id(contract_id, json):
@@ -259,7 +263,9 @@ async def update_some_fields_of_contract_by_id(contract_id, json):
                 raise ValidationError(message=invalid_values)
             absence_in_db = await check_existence_in_db([contract_id])
             if absence_in_db[1]:
-                raise NotFound(message='There are no contracts with such id')
+                raise NotFound(
+                    message='Not found! There are no contracts with such id'
+                               )
             query = contract.update().returning(
                 contract.c.id,
                 contract.c.title,
@@ -273,9 +279,9 @@ async def update_some_fields_of_contract_by_id(contract_id, json):
 
             return updated_contract
     except ValidationError as err:
-        return 400, err.messages
+        return 400, f'Bad request! {err.messages}'
     except NotFound as err:
-        return 404, err
+        return err.status_code, err.args
 
 
 async def delete_contract_by_id(contract_id):

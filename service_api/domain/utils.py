@@ -48,12 +48,14 @@ async def get_clause_for_query(url_params):
                 column_value[filter_argument] = value
                 invalid_value = await validate_values(column_value)
                 if invalid_value:
-                    raise ValidationError(message=invalid_value)
+                    raise ValidationError(
+                        message=f'Bad request{invalid_value}'
+                                          )
         else:
             column_value[filter_argument] = argument_value[1:-1]
             invalid_value = await validate_values(column_value)
             if invalid_value:
-                raise ValidationError(message=invalid_value)
+                raise ValidationError(message=f'Bad request{invalid_value}')
 
         clause_text = f"{filter_argument} " \
             f"{AVAILABLE_OPERATORS.get(str(argument_operator))} " \
