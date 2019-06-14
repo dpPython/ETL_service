@@ -28,8 +28,17 @@ async def get_contracts(request):
 
 async def create_contracts(json):
     new_contracts = []
+    required_field_names = {
+        'title', 'amount', 'start_date', 'end_date',
+        'customer', 'executor'
+                            }
     try:
         for item in json:
+            field_names_in_request = set(item.keys())
+            if not required_field_names.issubset(field_names_in_request):
+                raise ValidationError(
+                    message='Not all required values in body'
+                                      )
             values_to_insert = {
                                 "title": item["title"],
                                 "amount": item["amount"],
@@ -61,8 +70,17 @@ async def create_contracts(json):
 async def update_contracts(json):
 
     updated_contracts = []
+    required_field_names = {
+        'title', 'amount', 'start_date', 'end_date',
+        'customer', 'executor'
+    }
     try:
         for item in json:
+            field_names_in_request = set(item.keys())
+            if not required_field_names.issubset(field_names_in_request):
+                raise ValidationError(
+                    message='Not all required values in body'
+                                      )
             values_to_update = {
                 "title": item["title"],
                 "amount": item["amount"],
@@ -152,8 +170,17 @@ async def get_contract_by_id(contract_id):
 
 
 async def update_contract_by_id(contract_id, json):
+    required_field_names = {
+        'title', 'amount', 'start_date', 'end_date',
+        'customer', 'executor'
+                            }
     try:
         for item in json:
+            field_names_in_request = set(item.keys())
+            if not required_field_names.issubset(field_names_in_request):
+                raise ValidationError(
+                    message='Not all required values in body'
+                                      )
             values_to_update = {
                 "title": item["title"],
                 "amount": item["amount"],
@@ -162,6 +189,36 @@ async def update_contract_by_id(contract_id, json):
                 "customer": item["customer"],
                 "executor": item["executor"]
             }
+            values_to_validate = values_to_update.copy()
+            values_to_validate['id'] = contract_id
+            invalid_values = await validate_values(values_to_validate)
+            if invalid_values:
+                raise ValidationError(message=invalid_values)
+            absence_in_db = await check_existence_in_db([contract_id])
+            if absence_in_db[1]:
+                raise NotFound(message='There are no contracts with such id')
+            query = contract.update().returning(
+                contract.c.id,
+                contract.c.title,
+                contract.c.customer,
+                contract.c.executor,
+                contract.c.start_date,
+                contract.c.end_date,
+                contract.c.amount
+            ).where(contract.c.id == contract_id).values(values_to_update)
+            updated_contract = await query_to_db(query, flag='one')
+
+            return updated_contract
+    except ValidationError as err:
+        return 400, err.messages
+    except NotFound as err:
+        return 404, err
+
+
+async def update_some_fields_of_contract_by_id(contract_id, json):
+    try:
+        for item in json:
+            values_to_update = item
             values_to_validate = values_to_update.copy()
             values_to_validate['id'] = contract_id
             invalid_values = await validate_values(values_to_validate)

@@ -8,7 +8,8 @@ from service_api.domain.services import (create_contracts,
                                          get_contracts,
                                          get_payments_by_contracts,
                                          update_contract_by_id,
-                                         update_contracts)
+                                         update_contracts,
+                                         update_some_fields_of_contract_by_id)
 from service_api.domain.utils import get_service_payments
 from service_api.resource.forms import ContractSchema
 
@@ -72,18 +73,33 @@ class Contract(HTTPMethodView):
         return response.json(result.data)
 
     async def put(self, request, contract_id):
-        update_contract = await update_contract_by_id(
+        updated_contract = await update_contract_by_id(
                                                       contract_id,
                                                       request.json
                                                       )
-        if update_contract[0] == 400:
+        if updated_contract[0] == 400:
             return response.json(
                 status=400,
-                body=f'Bad request! {update_contract[1]}'
+                body=f'Bad request! {updated_contract[1]}'
                                  )
-        elif update_contract[0] == 404:
-            return response.json(status=404, body=f'{update_contract[1]}')
-        result = ContractSchema().dump(update_contract)
+        elif updated_contract[0] == 404:
+            return response.json(status=404, body=f'{updated_contract[1]}')
+        result = ContractSchema().dump(updated_contract)
+        return response.json(result.data)
+
+    async def patch(self, request, contract_id):
+        updated_contract = await update_some_fields_of_contract_by_id(
+                                                              contract_id,
+                                                              request.json
+                                                                      )
+        if updated_contract[0] == 400:
+            return response.json(
+                status=400,
+                body=f'Bad request! {updated_contract[1]}'
+                                 )
+        elif updated_contract[0] == 404:
+            return response.json(status=404, body=f'{updated_contract[1]}')
+        result = ContractSchema().dump(updated_contract)
         return response.json(result.data)
 
     async def delete(self, request, contract_id):
