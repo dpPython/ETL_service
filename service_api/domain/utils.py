@@ -158,7 +158,7 @@ async def get_service_payments():
         payments_socket.append(socket_list[0][2:-1])
         payments_socket.append(socket_list[1][2:-2])
         url = f"http://{payments_socket[0]}:{payments_socket[1]}/payments/" \
-            f"?filter=contract_id%20eq%20"
+            f"contracts/?filter=contract_id%20eq%20"
         return url
 
 

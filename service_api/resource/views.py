@@ -127,6 +127,10 @@ class PaymentsByContracts(HTTPMethodView):
         if payments_url == 404:
             return text("Service payments is not available")
         payments_by_contracts = await get_payments_by_contracts(
-                                            payments_url, contract_ids
-                                                                )
+                                            payments_url, contract_ids)
+        if type(payments_by_contracts) == tuple:
+            return response.json(
+                status=payments_by_contracts[0],
+                body=payments_by_contracts[1]
+            )
         return response.json(payments_by_contracts)

@@ -321,21 +321,21 @@ async def get_payments_by_contracts(url, contract_ids):
     contract_ids_list = contract_ids.replace(" ", "").split(",")
     payments_by_contracts = {}
     for contract_id in contract_ids_list:
-        url_with_contract_id = f"{url}%27{contract_id}%27"
         try:
+            invalid_contract_id = await validate_values({'id': contract_id})
+            if invalid_contract_id:
+                raise ValidationError(message=invalid_contract_id)
+            url_with_contract_id = f"{url}'{contract_id}'"
             async with aiohttp.ClientSession() as session:
                 payments_by_contract = await session.get(url_with_contract_id)
                 if payments_by_contract.content_type == 'text/plain':
-                    data = 'Incorrect input of contract_id '
+                    data = 'There are no payments by this contract'
                 else:
                     data = await payments_by_contract.json()
-                    if not data:
-                        data = 'There are no payments by this contract'
                 payments_by_contracts[
                         f'Payments by contract {contract_id}'
-                                      ] = data
-        except ValueError:
-            logging.error(f"ValueError. No payments with contract id "
-                          f"{contract_id} founded")
-            return 404
+                                          ] = data
+        except ValidationError as err:
+            return 400, f'Bad request! {err.messages}'
+
     return payments_by_contracts
