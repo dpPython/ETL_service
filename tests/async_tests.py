@@ -22,7 +22,7 @@ async def test_get_params_from_get_request():
 async def test_validate_values():
     field_value = {'id': 'e3f8a61b-9fab-445b-b8e3-61ddb4da5777'}
     result = await validate_values(field_value)
-    expected_result = {}
+    expected_result = None
     assert result == expected_result
 
 

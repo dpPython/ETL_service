@@ -16,6 +16,8 @@ async def get_params_from_get_request(get_request_url):
                   .replace(f"http://{SERVICE_SOCKET}/{SERVICE_NAME}", "")
                   .replace("%20", " ")
                   .replace("%27", "'")
+                  .replace("%28", "(")
+                  .replace("%29", ")")
                   )
     return url_params
 
@@ -113,9 +115,9 @@ async def define_operator_and_values(url_params, filter_argument,
         value_end = url_params.find(symbol, value_start + 1)
         value = url_params[value_start: value_end + 1]
     else:
-        value_start = url_params.find("%28", operator_index_end)
-        value_end = url_params.find("%29", value_start)
-        value = f'({url_params[value_start + 3: value_end]})'
+        value_start = url_params.find("(", operator_index_end)
+        value_end = url_params.find(")", value_start)
+        value = f'({url_params[value_start + 1: value_end]})'
     return [operator, value]
 
 

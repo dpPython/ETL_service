@@ -11,7 +11,7 @@ flake8==3.7.7
 httptools==0.0.13
 idna==2.8
 importlib-metadata==0.17
-marshmallow==2.19.2
+marshmallow==3.0.0rc6
 mccabe==0.6.1
 more-itertools==7.0.0
 multidict==4.5.2

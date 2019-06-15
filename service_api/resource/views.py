@@ -120,7 +120,7 @@ class Contract(HTTPMethodView):
         return response.json(message_after_delete)
 
 
-class PaymentsByContract(HTTPMethodView):
+class PaymentsByContracts(HTTPMethodView):
 
     async def get(self, request, contract_ids):
         payments_url = await get_service_payments()

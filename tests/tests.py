@@ -56,23 +56,21 @@ def test_contracts_put_returns_200():
 
 def test_contracts_post_returns_200():
     data = [{
-        "customer": "Honda1",
-        "id": "580721d1-9611-4b23-aa3c-9c4458a58978",
-        "amount": 200000000,
-        "executor": "Brembo",
-        "end_date": "2018-12-27T00:00:00+02:00",
-        "start_date": "2019-12-27T00:00:00+02:00",
-        "title": "Contract-800"
-    },
-     {
-        "customer": "Acura",
-        "id": "791d5831-4c78-42c9-babd-a5a81fe7faf3",
-        "amount": 30000000,
-        "executor": "Toyota Motor",
-        "end_date": "2018-01-01T00:00:00+02:00",
-        "start_date": "2019-01-01T00:00:00+02:00",
-        "title": "Contract-801"
-    }]
+            "customer": "Honda",
+            "executor": "Brembo",
+            "title": "Contract-800",
+            "end_date": "2018-12-27",
+            "amount": 20000000,
+            "start_date": "2019-12-27"
+            },
+            {
+            "customer": "Acura",
+            "executor": "Toyota Motor",
+            "title": "Contract-801",
+            "end_date": "2018-01-01",
+            "amount": 30000000,
+            "start_date": "2019-01-01"
+            }]
     request, response = app.test_client.post(
                                              '/contracts/',
                                              data=json.dumps(data)
