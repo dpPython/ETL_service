@@ -27,7 +27,7 @@ app.add_route(Contracts.as_view(), '/contracts')
 
 '''
 Contract resource with allowed methods GET, PUT, PATCH, DELETE
-The same functionality as Contracts but only for one instance and except 
+The same functionality as Contracts but only for one instance and except
 of creating an instance of contract.
 The id of instance must be specified in url.
 '''

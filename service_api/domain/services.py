@@ -1,5 +1,3 @@
-import logging
-
 import aiohttp
 from marshmallow import ValidationError
 from sanic.exceptions import NotFound
@@ -131,7 +129,8 @@ async def update_some_fields_of_contracts(json):
                 contract.c.start_date,
                 contract.c.end_date,
                 contract.c.amount
-            ).where(contract.c.id == values_to_validate.get('id')).values(values_to_update)
+            ).where(contract.c.id
+                    == values_to_validate.get('id')).values(values_to_update)
             updated_contract = await query_to_db(query, flag="one")
             updated_contracts.append(updated_contract)
 

@@ -11,8 +11,8 @@ from service_api.domain.services import (create_contracts,
                                          update_contracts,
                                          update_some_fields_of_contract_by_id,
                                          update_some_fields_of_contracts)
-from service_api.domain.utils import (get_service_payments,
-                                      filter_response_by_fields)
+from service_api.domain.utils import (filter_response_by_fields,
+                                      get_service_payments)
 from service_api.resource.forms import ContractSchema
 
 
