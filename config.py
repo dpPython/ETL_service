@@ -1,3 +1,5 @@
+import socket
+
 SERVICE_NAME = "contracts"
 SERVICE_HOST = "0.0.0.0"
 SERVICE_PORT = 8007
@@ -11,3 +13,4 @@ DB_PASSWORD = "contracts_user"
 
 SDA_HOST = "0.0.0.0"
 SDA_PORT = 5001
+SDA_CONNECT = socket.gethostbyname(socket.gethostname())
