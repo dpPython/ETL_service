@@ -154,6 +154,8 @@ async def get_service_payments():
     async with aiohttp.ClientSession() as session:
         resp = await session.get(sda_address)
         decoded_socket = await resp.text()
+        if decoded_socket == '/payments':
+            return 404
         socket_list = decoded_socket.split(",")
         payments_socket.append(socket_list[0][2:-1])
         payments_socket.append(socket_list[1][2:-2])

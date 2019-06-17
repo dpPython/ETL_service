@@ -32,6 +32,39 @@
 			"response": []
 		},
 		{
+			"name": "get all contracts with specified fields",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?fields=id, title, customer",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "fields",
+							"value": "id, title, customer"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "filter id equal",
 			"request": {
 				"method": "GET",
@@ -41,7 +74,40 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8007/contracts/?filter=id eq 'fdcdff55-93fa-4434-ad14-d66a0e77a964'",
+					"raw": "http://0.0.0.0:8007/contracts/?filter=id eq '8be017c0-66dd-4df5-879f-58397cd5c132'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "id eq '8be017c0-66dd-4df5-879f-58397cd5c132'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter id equal with specified fields",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=id eq 'fdcdff55-93fa-4434-ad14-d66a0e77a964'&fields=id, title, customer",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -58,6 +124,10 @@
 						{
 							"key": "filter",
 							"value": "id eq 'fdcdff55-93fa-4434-ad14-d66a0e77a964'"
+						},
+						{
+							"key": "fields",
+							"value": "id, title, customer"
 						}
 					]
 				}
@@ -74,7 +144,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8007/contracts/?filter=customer eq 'Acura'",
+					"raw": "http://0.0.0.0:8007/contracts/?filter=customer eq 'Honda'",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -90,7 +160,7 @@
 					"query": [
 						{
 							"key": "filter",
-							"value": "customer eq 'Acura'"
+							"value": "customer eq 'Honda'"
 						}
 					]
 				}
@@ -164,7 +234,7 @@
 			"response": []
 		},
 		{
-			"name": "filter start_date equal",
+			"name": "filter amount not equal",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -173,7 +243,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date eq '2012-02-01'",
+					"raw": "http://0.0.0.0:8007/contracts/?filter=amount ne '52000'",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -189,7 +259,337 @@
 					"query": [
 						{
 							"key": "filter",
-							"value": "start_date eq '2012-02-01'"
+							"value": "amount ne '52000'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter amount greater then",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=amount gt '52000'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "amount gt '52000'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter amount greater then or equal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=amount ge '52000'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "amount ge '52000'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter amount less then",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=amount le '52000'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "amount le '52000'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter amount less then or equal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=amount le '52000'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "amount le '52000'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter start_date equal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date gt '2019-02-01'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "start_date gt '2019-02-01'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter start_date not equal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date ne '2012-02-01'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "start_date ne '2012-02-01'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter start_date greater then",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date gt '2012-02-01'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "start_date gt '2012-02-01'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter start_date greater then or equal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date ge '2012-02-01'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "start_date ge '2012-02-01'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter start_date less then",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date lt '2012-02-01'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "start_date lt '2012-02-01'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter start_date less then or equal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date le '2012-02-01'",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "start_date le '2012-02-01'"
 						}
 					]
 				}
@@ -371,7 +771,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8007/contracts/?filter=id in  ('9c413619-45d1-425e-bfc7-52ef4429f5b1', 'f1ec296c-dd71-419c-99ee-76533cef9d15')",
+					"raw": "http://0.0.0.0:8007/contracts/?filter=id in  ('7b8b2cc5-1cc9-4394-844c-ca4bef2b01af','cf5a8cc4-fe05-4fdd-b891-102e96018411')",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -387,7 +787,7 @@
 					"query": [
 						{
 							"key": "filter",
-							"value": "id in  ('9c413619-45d1-425e-bfc7-52ef4429f5b1', 'f1ec296c-dd71-419c-99ee-76533cef9d15')"
+							"value": "id in  ('7b8b2cc5-1cc9-4394-844c-ca4bef2b01af','cf5a8cc4-fe05-4fdd-b891-102e96018411')"
 						}
 					]
 				}
@@ -437,7 +837,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8007/contracts/?filter=end_date in  ('2013-04-22', '2013-05-04')",
+					"raw": "http://0.0.0.0:8007/contracts/?filter=end_date in  ('2013-04-22','2013-05-04')",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -453,7 +853,7 @@
 					"query": [
 						{
 							"key": "filter",
-							"value": "end_date in  ('2013-04-22', '2013-05-04')"
+							"value": "end_date in  ('2013-04-22','2013-05-04')"
 						}
 					]
 				}
@@ -470,7 +870,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8007/contracts/?filter=amount in  ('57800', '58000') and customer eq 'Hyundai Motor'",
+					"raw": "http://0.0.0.0:8007/contracts/?filter=amount in  ('57800','58000') and customer eq 'Hyundai Motor'",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -486,7 +886,40 @@
 					"query": [
 						{
 							"key": "filter",
-							"value": "amount in  ('57800', '58000') and customer eq 'Hyundai Motor'"
+							"value": "amount in  ('57800','58000') and customer eq 'Hyundai Motor'"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2 filters at once by date",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=start_date gt  ('2012-04-01') and end_date lt ('2019-04-01')",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "start_date gt  ('2012-04-01') and end_date lt ('2019-04-01')"
 						}
 					]
 				}
@@ -505,7 +938,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\n    {\n\t    \"customer\": \"Honda\",\n\t    \"executor\": \"Brembo\",\n\t    \"title\": \"Contract-800\",\n\t    \"end_date\": \"2018-12-27\",\n\t    \"amount\": 200000000,\n\t    \"start_date\": \"2019-12-27\"\n    },\n    \n    {\n        \"customer\": \"Acura\",\n\t    \"executor\": \"Toyota Motor\",\n\t    \"title\": \"Contract-801\",\n\t    \"end_date\": \"2018-01-01\",\n\t    \"amount\": 30000000,\n\t    \"start_date\": \"2019-01-01\"\n    }\n]\n"
+					"raw": "[\n    {\n\t    \"customer\": \"Honda\",\n\t    \"executor\": \"Brembo\",\n\t    \"title\": \"Contract-800\",\n\t    \"end_date\": \"2018-12-27\",\n\t    \"amount\": 20000000,\n\t    \"start_date\": \"2019-12-27\"\n    },\n    {\n        \"customer\": \"Acura\",\n\t    \"executor\": \"Toyota Motor\",\n\t    \"title\": \"Contract-801\",\n\t    \"end_date\": \"2018-01-01\",\n\t    \"amount\": 30000000,\n\t    \"start_date\": \"2019-01-01\"\n    }\n]\n"
 				},
 				"url": {
 					"raw": "http://0.0.0.0:8007/contracts",
@@ -536,7 +969,38 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\n    {\n        \"amount\": 23400,\n        \"id\": \"a32d6557-1553-40c5-a60a-47832e643e4f\",\n        \"title\": \"Contract-9999999\",\n        \"executor\": \"Airbus Group\",\n        \"start_date\": \"2010-07-09\",\n        \"end_date\": \"2011-06-24\",\n        \"customer\": \"Express Scripts Holding\"\n    },\n    {\n        \"amount\": 93600,\n        \"id\": \"f0ff9365-d1fd-4ee6-be2d-7c33cfd06475\",\n        \"title\": \"Contract-8888888\",\n        \"executor\": \"Airbus Group\",\n        \"start_date\": \"2014-05-13\",\n        \"end_date\": \"2015-04-28\",\n        \"customer\": \"Carrefour\"\n    }\n]"
+					"raw": "[\n    {\n        \"amount\": 23400,\n        \"id\": \"a32d6557-1553-40c5-a60a-47832e643e4f\",\n        \"title\": \"Contract-9999999\",\n        \"executor\": \"Airbus Group\",\n        \"start_date\": \"2014-07-09\",\n        \"end_date\": \"2011-06-24\",\n        \"customer\": \"Express Scripts Holding\"\n    },\n    {\n        \"amount\": 93600,\n        \"id\": \"f0ff9365-d1fd-4ee6-be2d-7c33cfd06475\",\n        \"title\": \"Contract-8888888\",\n        \"executor\": \"Airbus Group\",\n        \"start_date\": \"2014-05-13\",\n        \"end_date\": \"2015-04-28\",\n        \"customer\": \"Carrefour\"\n    }\n]"
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update_some_fields_in_many_contracts",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"id\": \"a32d6557-1553-40c5-a60a-47832e643e4f\",\n        \"title\": \"Contract-1111111\",\n        \"executor\": \"Airbus Group\",\n        \"start_date\": \"2014-07-09\"\n    },\n    {\n        \"amount\": \"9999\",\n        \"id\": \"f0ff9365-d1fd-4ee6-be2d-7c33cfd06475\",\n        \"start_date\": \"2014-05-13\",\n        \"end_date\": \"2015-04-28\",\n        \"customer\": \"Carrefour\"\n    }\n]"
 				},
 				"url": {
 					"raw": "http://0.0.0.0:8007/contracts",
@@ -570,7 +1034,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8007/contracts?id=c31d866e-7b88-4388-8df4-86283edbc341, 1546f9af-a268-49c0-9fbb-37c61be1b98c",
+					"raw": "http://0.0.0.0:8007/contracts?id=c31d866e-7b88-4388-8df4-86283edbc341, 1546f9af-a268-49c0-9fbb-37c61be1b98c, ec6242e1-2d7b-4e24-a507-0e415b045df6",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -585,7 +1049,7 @@
 					"query": [
 						{
 							"key": "id",
-							"value": "c31d866e-7b88-4388-8df4-86283edbc341, 1546f9af-a268-49c0-9fbb-37c61be1b98c"
+							"value": "c31d866e-7b88-4388-8df4-86283edbc341, 1546f9af-a268-49c0-9fbb-37c61be1b98c, ec6242e1-2d7b-4e24-a507-0e415b045df6"
 						}
 					]
 				}
@@ -631,7 +1095,39 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\n    {\n\t    \"customer\": \"Honda\",\n\t    \"executor\": \"Brembo\",\n\t    \"title\": \"Contract-9999\",\n\t    \"end_date\": \"2018-12-27\",\n\t    \"amount\": 200000000,\n\t    \"start_date\": \"2019-12-27\"\n    }\n]"
+					"raw": "[\n    {\n\t    \"customer\": \"Honda\",\n\t    \"executor\": \"Brembo\",\n\t    \"title\": \"Contract-9999\",\n\t    \"end_date\": \"2018-12-27\",\n\t    \"amount\": 20000000,\n\t    \"start_date\": \"2019-12-27\"\n    }\n]"
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contract/0866891e-94c2-4eab-ab59-80ec9fdd4923",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contract",
+						"0866891e-94c2-4eab-ab59-80ec9fdd4923"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update_some_fields_by_id",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n\t    \"amount\": 7900000000,\n\t    \"start_date\": \"2019-12-27\"\n    }\n]"
 				},
 				"url": {
 					"raw": "http://0.0.0.0:8007/contract/0866891e-94c2-4eab-ab59-80ec9fdd4923",
@@ -673,6 +1169,70 @@
 					"path": [
 						"contract",
 						"ea212ee3-9f2c-4c9b-8c11-cfd076b92727"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get payments by contracts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/payments_by_contracts/4622d860-3016-4585-8e74-0de20f4fec1a, 56385c03-3998-4868-82a8-d184ab28734d, 675ad0a5-f682-4f11-8bdf-fbc26b73beb9, 675ad0a5-f682-4f11-8bdf-fbc26b73beb",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"payments_by_contracts",
+						"4622d860-3016-4585-8e74-0de20f4fec1a, 56385c03-3998-4868-82a8-d184ab28734d, 675ad0a5-f682-4f11-8bdf-fbc26b73beb9, 675ad0a5-f682-4f11-8bdf-fbc26b73beb"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter title in with specified fields",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8007/contracts/?filter=title in  ('Contract-240', 'Contract-244', 'Contract-250')&fields=id, title, customer",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8007",
+					"path": [
+						"contracts",
+						""
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "title in  ('Contract-240', 'Contract-244', 'Contract-250')"
+						},
+						{
+							"key": "fields",
+							"value": "id, title, customer"
+						}
 					]
 				}
 			},
