@@ -173,3 +173,17 @@ async def filter_response_by_fields(fields, contracts):
                 filtered_contract[item[0]] = item[1]
         filtered_contracts.append(filtered_contract)
     return filtered_contracts
+
+
+async def pagination_of_url_params(contract_ids_list):
+    flag = True
+    list_of_urls_params = []
+    while flag:
+        if len(contract_ids_list) <= 50:
+            list_of_urls_params.append(contract_ids_list)
+            flag = False
+        elif len(contract_ids_list) > 50:
+            list_of_three_items = contract_ids_list[0:50]
+            list_of_urls_params.append(list_of_three_items)
+            contract_ids_list = contract_ids_list[50:]
+    return list_of_urls_params

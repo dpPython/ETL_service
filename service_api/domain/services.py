@@ -5,7 +5,8 @@ from sanic.exceptions import NotFound
 from service_api.domain.models import contract
 from service_api.domain.utils import (get_clause_for_query,
                                       get_params_from_get_request, query_to_db,
-                                      validate_values)
+                                      validate_values,
+                                      pagination_of_url_params)
 
 
 async def get_contracts(request):
@@ -321,27 +322,29 @@ async def get_payments_by_contracts(url, request):
     try:
         if query_params is None:
             raise ValidationError(message='Incorrect query')
-        contract_ids_list = (query_params
-                             .replace('contract_id in ', '')
-                             .replace('(', '')
-                             .replace(')', '')
-                             .replace(" ", "")
-                             .split(","))
+        all_contract_ids_list = (query_params
+                                 .replace('contract_id in ', '')
+                                 .replace('(', '')
+                                 .replace(')', '')
+                                 .replace(" ", "")
+                                 .split(","))
+        paginated_contract_ids_list = await pagination_of_url_params(all_contract_ids_list)
         payments_by_contracts = {}
-        for contract_id in contract_ids_list:
-            invalid_contract_id = await validate_values({'id': contract_id})
-            if invalid_contract_id:
-                raise ValidationError(message=invalid_contract_id)
-            url_with_contract_id = f"{url}'{contract_id}'"
-            async with aiohttp.ClientSession() as session:
-                payments_by_contract = await session.get(url_with_contract_id)
-                if payments_by_contract.content_type == 'text/plain':
-                    data = 'There are no payments by this contract'
-                else:
-                    data = await payments_by_contract.json()
-                payments_by_contracts[
-                        f'Payments by contract {contract_id}'
-                                          ] = data
+        for contract_ids_list in paginated_contract_ids_list:
+            for contract_id in contract_ids_list:
+                invalid_contract_id = await validate_values({'id': contract_id})
+                if invalid_contract_id:
+                    raise ValidationError(message=invalid_contract_id)
+                url_with_contract_id = f"{url}'{contract_id}'"
+                async with aiohttp.ClientSession() as session:
+                    payments_by_contract = await session.get(url_with_contract_id)
+                    if payments_by_contract.content_type == 'text/plain':
+                        data = 'There are no payments by this contract'
+                    else:
+                        data = await payments_by_contract.json()
+                    payments_by_contracts[
+                            f'Payments by contract {contract_id}'
+                                              ] = data
     except ValidationError as err:
         return 400, f'Bad request! {err.messages}'
 
