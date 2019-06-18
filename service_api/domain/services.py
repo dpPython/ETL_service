@@ -316,11 +316,19 @@ async def delete_contract_by_id(contract_id):
         return 400, err.messages
 
 
-async def get_payments_by_contracts(url, contract_ids):
-    contract_ids_list = contract_ids.replace(" ", "").split(",")
-    payments_by_contracts = {}
-    for contract_id in contract_ids_list:
-        try:
+async def get_payments_by_contracts(url, request):
+    query_params = request.args.get('filter')
+    try:
+        if query_params is None:
+            raise ValidationError(message='Incorrect query')
+        contract_ids_list = (query_params
+                             .replace('contract_id in ', '')
+                             .replace('(', '')
+                             .replace(')', '')
+                             .replace(" ", "")
+                             .split(","))
+        payments_by_contracts = {}
+        for contract_id in contract_ids_list:
             invalid_contract_id = await validate_values({'id': contract_id})
             if invalid_contract_id:
                 raise ValidationError(message=invalid_contract_id)
@@ -334,7 +342,7 @@ async def get_payments_by_contracts(url, contract_ids):
                 payments_by_contracts[
                         f'Payments by contract {contract_id}'
                                           ] = data
-        except ValidationError as err:
-            return 400, f'Bad request! {err.messages}'
+    except ValidationError as err:
+        return 400, f'Bad request! {err.messages}'
 
     return payments_by_contracts

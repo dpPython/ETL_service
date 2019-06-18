@@ -39,4 +39,4 @@ PaymentsByContracts resource has only GET method.
  specified in url
 '''
 app.add_route(PaymentsByContracts.as_view(),
-              '/payments_by_contracts/<contract_ids>')
+              '/payments_by_contracts')

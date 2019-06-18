@@ -12,7 +12,7 @@ async def registration():
     # sda = f'http://{SDA_HOST}:{SDA_PORT}/?name={SERVICE_NAME}&' \
     #       f'ip={SDA_CONNECT}&port={SERVICE_PORT}'
     sda = f'http://{SDA_HOST}:{SDA_PORT}/?name={SERVICE_NAME}&' \
-        f'ip={SDA_HOST}&port={SERVICE_PORT}'
+        f'ip={SERVICE_HOST}&port={SERVICE_PORT}'
     try:
         async with aiohttp.ClientSession() as session:
             await session.post(sda)
